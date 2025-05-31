@@ -1,0 +1,37 @@
+services:
+  # Backend API Service
+  - type: web
+    name: gcbc-api
+    env: node
+    plan: free
+    buildCommand: cd server && npm cache clean --force && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gcbc-db
+          property: connectionString
+      - key: GLASSDOOR_COOKIES
+        sync: false # You'll set this manually in Render dashboard
+      - key: GLASSDOOR_CSRF_TOKEN
+        sync: false # You'll set this manually in Render dashboard
+
+  # Frontend Static Site
+  - type: web
+    name: gcbc
+    env: static
+    plan: free
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://gcbc-api.onrender.com
+
+# Database
+databases:
+  - name: gcbc-db
+    plan: free
