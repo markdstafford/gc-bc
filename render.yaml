@@ -15,10 +15,6 @@ services:
         fromDatabase:
           name: gcbc-db
           property: connectionString
-      - key: GLASSDOOR_COOKIES
-        sync: false # You'll set this manually in Render dashboard
-      - key: GLASSDOOR_CSRF_TOKEN
-        sync: false # You'll set this manually in Render dashboard
 
   # Frontend Static Site
   - type: web

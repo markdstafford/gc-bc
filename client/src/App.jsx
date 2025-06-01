@@ -9,7 +9,9 @@ import { ReviewsTable } from "./components/ReviewsTable";
 import { ReviewDetails } from "./components/ReviewDetails";
 import { CompanyLogo } from "./components/CompanyLogo";
 import { VersionNotice } from "./components/VersionNotice";
-import { Loader2 } from "lucide-react";
+import { UserGuidance } from "./components/UserGuidance";
+import { FeedbackButton } from "./components/FeedbackButton";
+import { Loader2, HelpCircle } from "lucide-react";
 import { subMonths, isAfter, parseISO } from "date-fns";
 import { APP_VERSION } from "./utils/version";
 import { initializeVersioning } from "./utils/versionService";
@@ -29,12 +31,13 @@ function App() {
   const [companyReviews, setCompanyReviews] = useState({}); // { [companyId]: reviewsArray }
   const [loadingCompared, setLoadingCompared] = useState({}); // { [companyId]: true/false }
   const [versionStatus, setVersionStatus] = useState(null); // Track version status
-  const [versionModalOpen, setVersionModalOpen] = useState(false); // For showing version updates  // Initialize versioning and check for updates on mount
+  const [versionModalOpen, setVersionModalOpen] = useState(false); // For showing version updates
+  const [userGuidanceOpen, setUserGuidanceOpen] = useState(false); // For showing user guidance  // Initialize versioning and check for updates on mount
   useEffect(() => {
     const checkVersion = async () => {
       setLoading(true);
       try {
-        console.log(`Initializing Glass2Door v${APP_VERSION}`);
+        console.log(`Initializing gc/bc v${APP_VERSION}`);
 
         // Initialize versioning system
         const status = await initializeVersioning();
@@ -77,7 +80,6 @@ function App() {
 
   const handleCompanySelect = async (companyId) => {
     console.log("Selected company:", companyId);
-    // Store the company ID, not the glassdoorId
     setSelectedCompany(companyId);
     setReviews([]);
     setSelectedReviews([]);
@@ -88,24 +90,18 @@ function App() {
       setLoadingProgress(null);
 
       try {
-        // Find the selected company to get the glassdoorId for reviews
         const selectedCompany = companies.find(
           (company) => company.id === companyId
         );
         console.log("Found selected company:", selectedCompany);
 
         if (selectedCompany) {
-          console.log(
-            "Using glassdoorId for reviews:",
-            selectedCompany.glassdoorId
-          );
           const allReviews = await reviewApi.fetchAllReviews(
-            selectedCompany.glassdoorId,
+            selectedCompany.id,
             (progress) => {
               setLoadingProgress(progress);
             }
           );
-          console.log("Received reviews:", allReviews ? allReviews.length : 0);
           setReviews(allReviews);
         } else {
           console.error("Selected company not found:", companyId);
@@ -129,7 +125,7 @@ function App() {
   };
 
   const handleAddCompany = async (
-    glassdoorId,
+    id,
     name,
     logoUrl,
     website,
@@ -137,14 +133,7 @@ function App() {
     location
   ) => {
     try {
-      await companyApi.create(
-        glassdoorId,
-        name,
-        logoUrl,
-        website,
-        size,
-        location
-      );
+      await companyApi.create(id, name, logoUrl, website, size, location);
       await loadCompanies();
     } catch (error) {
       console.error("Failed to add company:", error);
@@ -153,7 +142,6 @@ function App() {
 
   const handleUpdateCompany = async (
     id,
-    glassdoorId,
     name,
     logoUrl,
     website,
@@ -161,15 +149,7 @@ function App() {
     location
   ) => {
     try {
-      await companyApi.update(
-        id,
-        glassdoorId,
-        name,
-        logoUrl,
-        website,
-        size,
-        location
-      );
+      await companyApi.update(id, name, logoUrl, website, size, location);
       await loadCompanies();
     } catch (error) {
       console.error("Failed to update company:", error);
@@ -181,9 +161,7 @@ function App() {
       try {
         await companyApi.delete(id);
         await loadCompanies();
-        if (
-          companies.find((c) => c.id === id)?.glassdoorId === selectedCompany
-        ) {
+        if (companies.find((c) => c.id === id)?.id === selectedCompany) {
           setSelectedCompany(null);
           setReviews([]);
         }
@@ -241,8 +219,7 @@ function App() {
     if (!companyReviews[company.id]) {
       setLoadingCompared((lc) => ({ ...lc, [company.id]: true }));
       try {
-        // Use glassdoorId to fetch reviews
-        const reviews = await reviewApi.fetchAllReviews(company.glassdoorId);
+        const reviews = await reviewApi.fetchAllReviews(company.id);
         setCompanyReviews((cr) => ({ ...cr, [company.id]: reviews }));
       } catch (e) {
         setCompanyReviews((cr) => ({ ...cr, [company.id]: [] }));
@@ -339,24 +316,38 @@ function App() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">gc/bc</h1>
-          <p className="text-gray-600">
-            You deserve a good company; gc/bc will help you find it
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Version {APP_VERSION}
-            <button
-              className="ml-2 text-blue-500 hover:text-blue-700 hover:underline"
-              title="Check for updates"
-              onClick={async () => {
-                const status = await initializeVersioning();
-                setVersionStatus(status);
-                setVersionModalOpen(true);
-              }}
-            >
-              ↻
-            </button>
-          </p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">gc/bc</h1>
+              <p className="text-gray-600">
+                You deserve a good company; gc/bc will help you find it
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Version {APP_VERSION}
+                <button
+                  className="ml-2 text-blue-500 hover:text-blue-700 hover:underline"
+                  title="Check for updates"
+                  onClick={async () => {
+                    const status = await initializeVersioning();
+                    setVersionStatus(status);
+                    setVersionModalOpen(true);
+                  }}
+                >
+                  ↻
+                </button>
+              </p>
+            </div>
+            <div className="flex items-center">
+              <FeedbackButton />
+              <button
+                className="p-2 text-gray-600 hover:text-blue-600 focus:outline-none"
+                title="User Guide"
+                onClick={() => setUserGuidanceOpen(true)}
+              >
+                <HelpCircle size={20} />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Show version notice if there's version status and it's either first run or an update */}
@@ -537,6 +528,25 @@ function App() {
           onSearch={handleCompanySearch}
         />
       </Modal>
+
+      <Modal
+        isOpen={userGuidanceOpen}
+        onClose={() => setUserGuidanceOpen(false)}
+        title="User Guide"
+      >
+        <UserGuidance />
+      </Modal>
+
+      {/* Footer note */}
+      <footer className="text-center py-4 text-gray-500 text-sm">
+        <p>vibe coded with ❤️</p>
+        <button
+          className="mt-1 text-blue-500 hover:text-blue-700 hover:underline text-sm"
+          onClick={() => setUserGuidanceOpen(true)}
+        >
+          View user guide
+        </button>
+      </footer>
     </div>
   );
 }

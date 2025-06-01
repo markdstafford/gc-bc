@@ -1,6 +1,6 @@
-# Glass2Door Migration System Guide
+# gc/bc Migration System Guide
 
-This document explains how to use the version tracking and migration system in Glass2Door.
+This document explains how to use the version tracking and migration system in gc/bc.
 
 ## Overview
 
@@ -8,7 +8,7 @@ The version system allows for tracking app versions and performing migrations wh
 
 ## Version Format
 
-Glass2Door follows semantic versioning:
+gc/bc follows semantic versioning:
 
 ```
 MAJOR.MINOR.PATCH-LABEL
@@ -107,11 +107,11 @@ The system provides several pre-built strategies:
 
 ## Local Storage Inventory
 
-The following localStorage keys are currently used in Glass2Door:
+The following localStorage keys are currently used in gc/bc:
 
 ### Core Data Storage
 - `companies`: Contains all saved company data
-- `reviews_{glassdoorId}`: Reviews cache for a specific Glassdoor company ID
+- `reviews_{id}`: Reviews cache for a specific company
 - `app_version`: Current app version
 
 ### UI Settings

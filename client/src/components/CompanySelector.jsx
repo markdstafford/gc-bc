@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Settings, Building2 } from "lucide-react";
+import { Search, Settings, Building2, RefreshCw } from "lucide-react";
 import { CompanyInfoRow } from "./CompanyInfoRow";
 import { CompanyLogo } from "./CompanyLogo";
 
@@ -9,6 +9,7 @@ export function CompanySelector({
   onSelect,
   onOpenManagement,
   onAddCompare,
+  onRefreshReviews,
   comparedCompanies = [],
   compareLimitReached = false,
 }) {
@@ -22,7 +23,6 @@ export function CompanySelector({
       website: company.website,
       headquarters: company.location,
       size: company.size,
-      glassdoorId: company.glassdoorId,
       name: company.name,
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -90,16 +90,28 @@ export function CompanySelector({
                     location={company.headquarters}
                     rightContent={
                       showCompare ? (
-                        <button
-                          className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-medium"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onAddCompare) onAddCompare(company);
-                            setDropdownOpen(false);
-                          }}
-                        >
-                          + Compare
-                        </button>
+                        <>
+                          <button
+                            className="mr-1 px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onRefreshReviews) onRefreshReviews(company);
+                            }}
+                            title="Refresh Reviews"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onAddCompare) onAddCompare(company);
+                              setDropdownOpen(false);
+                            }}
+                          >
+                            + Compare
+                          </button>
+                        </>
                       ) : null
                     }
                     onClick={() => handleSelect(company.id)}

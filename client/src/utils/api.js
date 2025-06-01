@@ -47,10 +47,10 @@ export const companyApi = {
     }
   },
 
-  create: async (glassdoorId, name, logoUrl, website, size, location) => {
+  create: async (id, name, logoUrl, website, size, location) => {
     // Add to local storage instead of sending to server
     return addCompanyToStorage({
-      glassdoorId,
+      id,
       name,
       logoUrl,
       website,
@@ -59,10 +59,10 @@ export const companyApi = {
     });
   },
 
-  update: async (id, glassdoorId, name, logoUrl, website, size, location) => {
+  update: async (id, name, logoUrl, website, size, location) => {
     // Update in local storage
     return updateCompanyInStorage(id, {
-      glassdoorId,
+      id,
       name,
       logoUrl,
       website,
@@ -72,28 +72,23 @@ export const companyApi = {
   },
 
   delete: async (id) => {
-    // Delete from local storage
     return deleteCompanyFromStorage(id);
   },
 };
 
 export const reviewApi = {
   fetchReviews: async (employerId, page = 1) => {
-    // Make real API calls to fetch reviews
     if (!employerId) {
       console.error("No employerId provided to fetchReviews");
       throw new Error("No employerId provided");
     }
 
-    // Ensure we're using the glassdoor ID, not the local database ID
-    // The server expects numeric IDs, so remove any quotes
     const numericEmployerId = parseInt(employerId, 10) || employerId;
     console.log(
       `Fetching reviews for employerId: ${numericEmployerId} (original: ${employerId}), page: ${page}`
     );
 
     try {
-      // Try using a direct URL instead of the api instance
       const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const url = `${baseUrl}/api/reviews`;
       console.log("Making API request to:", url);
@@ -112,7 +107,6 @@ export const reviewApi = {
   },
 
   fetchAllReviews: async (employerId, onProgress) => {
-    // Client-side cache key
     const cacheKey = `reviews_${employerId}`;
     const cacheRaw = localStorage.getItem(cacheKey);
     if (cacheRaw) {

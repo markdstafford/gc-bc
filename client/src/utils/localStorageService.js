@@ -7,7 +7,6 @@ export const LOCAL_STORAGE_KEYS = {
   // Core data storage
   COMPANIES: COMPANIES_KEY,
   APP_VERSION: "app_version",
-  // Reviews cache keys follow the pattern: reviews_{glassdoorId}
 
   // UI Settings - ReviewsTable component
   REVIEWS_TABLE_COLUMN_ORDER: "reviewsTableColumnOrder",
@@ -41,21 +40,18 @@ export const getAllCompanies = () => {
 // Add a new company to local storage
 export const addCompany = (company) => {
   const companies = getAllCompanies();
-  // Check if company with same glassdoorId already exists
-  if (companies.some((c) => c.glassdoorId === company.glassdoorId)) {
+  if (companies.some((c) => c.id === company.id)) {
     return null; // Company already exists
   }
 
-  // Generate a new ID (simple implementation)
-  const maxId = companies.reduce((max, c) => Math.max(max, c.id || 0), 0);
-  const newCompany = {
+  const companyToStore = {
     ...company,
-    id: maxId + 1,
+    id: company.id,
   };
 
-  companies.push(newCompany);
+  companies.push(companyToStore);
   localStorage.setItem(COMPANIES_KEY, JSON.stringify(companies));
-  return newCompany;
+  return companyToStore;
 };
 
 // Update an existing company

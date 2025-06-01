@@ -1,6 +1,6 @@
 # gc/bc
 
-A powerful tool for analyzing and visualizing Glassdoor company reviews. Built with React, Node.js, and PostgreSQL.
+You deserve a good company; gc/bc will help you find it. Vibe coded with ❤️, React, and Node.js.
 
 ## Features
 
@@ -23,14 +23,12 @@ A powerful tool for analyzing and visualizing Glassdoor company reviews. Built w
 - Backend:
   - Node.js
   - Express
-  - PostgreSQL (Production)
-  - SQLite (Development)
 
 ## Getting Started
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/gc-bc.git
+git clone https://github.com/markdstafford/gc-bc.git
 cd gc-bc
 ```
 
@@ -64,9 +62,6 @@ npm run dev
 
 The application is configured for deployment on Render.com. Required environment variables:
 
-- `DATABASE_URL`: PostgreSQL connection string
-- `GLASSDOOR_COOKIES`: Glassdoor authentication cookies
-- `GLASSDOOR_CSRF_TOKEN`: Glassdoor CSRF token
 - `NODE_ENV`: Set to "production"
 
 ## License

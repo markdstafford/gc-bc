@@ -43,7 +43,7 @@ export function VersionNotice({ versionStatus, onClose }) {
             <div className="flex justify-between items-center">
               <h3 className="text-sm font-medium text-blue-800">
                 {firstRun
-                  ? `Welcome to Glass2Door v${APP_VERSION}`
+                  ? `Welcome to gc/bc v${APP_VERSION}`
                   : `Updated to v${APP_VERSION}`}
               </h3>
               {updated &&
@@ -59,15 +59,12 @@ export function VersionNotice({ versionStatus, onClose }) {
             </div>
             <div className="mt-2 text-sm text-blue-700">
               {firstRun ? (
-                <p>
-                  Thank you for using Glass2Door! This application helps you
-                  analyze and visualize company reviews from Glassdoor.
-                </p>
+                <p>You deserve a good company; gc/bc will help you find it</p>
               ) : updated ? (
                 <div>
                   <p>
-                    Glass2Door has been updated from v{fromVersion} to v
-                    {APP_VERSION}.
+                    gc/bc has been updated from v{fromVersion} to v{APP_VERSION}
+                    .
                   </p>
                   {migrationResult && (
                     <div className="mt-1">
@@ -102,7 +99,7 @@ export function VersionNotice({ versionStatus, onClose }) {
                   )}
                 </div>
               ) : (
-                <p>You're running the latest version of Glass2Door.</p>
+                <p>You're running the latest version of gc/bc.</p>
               )}
 
               {/* Show version changes when expanded */}
@@ -111,7 +108,7 @@ export function VersionNotice({ versionStatus, onClose }) {
                 currentVersionInfo.changes.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-blue-200">
                     <h4 className="text-xs font-semibold text-blue-700 mb-2">
-                      What's New in v{APP_VERSION}
+                      What's new in v{APP_VERSION}
                     </h4>
                     <ul className="text-xs text-blue-700 list-disc ml-4 space-y-1">
                       {currentVersionInfo.changes.map((change, i) => (

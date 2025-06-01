@@ -3,6 +3,17 @@ import cors from "cors";
 import axios from "axios";
 import dotenv from "dotenv";
 
+// Import Linear SDK
+import { LinearClient } from "@linear/sdk";
+
+// Import Linear service functions
+import {
+  getLinearClient,
+  getLinearTeams,
+  submitBugReport,
+  submitFeatureRequest,
+} from "./linearService.js";
+
 // Load environment variables
 dotenv.config();
 
@@ -164,7 +175,7 @@ app.post("/api/companies/search", async (req, res) => {
       )
       .map((result) => ({
         id: result.employer.id,
-        shortName: result.employer.shortName,
+        name: result.employer.shortName,
         logoUrl:
           result.employer.squareLogoUrl || result.employer.logoUrl || null,
         website: result.employer.website || null,
@@ -190,7 +201,7 @@ app.post("/api/companies/search", async (req, res) => {
     });
   }
 });
-
+/*
 // Company search endpoint with enhanced data
 app.post("/api/companies/search-enhanced", async (req, res) => {
   const { query } = req.body;
@@ -325,7 +336,7 @@ app.post("/api/companies/search-enhanced", async (req, res) => {
 
           return {
             id: result.employer.id,
-            shortName: result.employer.shortName,
+            name: result.employer.shortName,
             logoUrl: result.employer.bestProfile?.squareLogoUrl || null,
             ratings: result.employer.ratings,
             reviewCount: reviewCount,
@@ -337,7 +348,7 @@ app.post("/api/companies/search-enhanced", async (req, res) => {
           );
           return {
             id: result.employer.id,
-            shortName: result.employer.shortName,
+            name: result.employer.shortName,
             logoUrl: result.employer.bestProfile?.squareLogoUrl || null,
             ratings: result.employer.ratings,
             reviewCount: 0,
@@ -367,7 +378,7 @@ app.post("/api/companies/search-enhanced", async (req, res) => {
     });
   }
 });
-
+*/
 // GraphQL endpoint for fetching reviews
 app.post("/api/reviews", async (req, res) => {
   const { employerId, page = 1 } = req.body;
@@ -457,6 +468,94 @@ app.post("/api/reviews", async (req, res) => {
     });
   }
 });
+
+// Linear API integration is handled by linearService.js
+
+// Linear API authentication middleware - uses API key from environment variable
+const authenticateLinearRequest = (req, res, next) => {
+  const apiKey = process.env.LINEAR_API_KEY;
+
+  if (!apiKey) {
+    return res
+      .status(401)
+      .json({ error: "Linear API key not configured on server" });
+  }
+
+  try {
+    // Store the API key in the request object for route handlers
+    req.linearApiKey = apiKey;
+    next();
+  } catch (error) {
+    console.error("Linear authentication error:", error);
+    return res.status(401).json({ error: "Invalid Linear API key" });
+  }
+};
+
+// POST a bug report to Linear
+app.post("/api/report/bug", authenticateLinearRequest, async (req, res) => {
+  try {
+    const { title, description, priority } = req.body;
+    const apiKey = req.linearApiKey; // From environment variable
+    const teamId = process.env.LINEAR_TEAM_ID; // From environment variable
+
+    if (!title || !description || !teamId) {
+      return res.status(400).json({
+        error: "Title, description, and teamId are required",
+      });
+    }
+
+    // Use the submitBugReport function from linearService.js
+    const issue = await submitBugReport({
+      title,
+      description,
+      priority,
+      apiKey,
+      teamId,
+    });
+
+    res.json({
+      success: true,
+      issue,
+    });
+  } catch (error) {
+    console.error("Failed to create bug report:", error);
+    res.status(500).json({ error: "Failed to create bug report" });
+  }
+});
+
+// POST a feature request to Linear
+app.post("/api/report/feature", authenticateLinearRequest, async (req, res) => {
+  try {
+    const { title, description, priority } = req.body;
+    const apiKey = req.linearApiKey; // From environment variable
+    const teamId = process.env.LINEAR_TEAM_ID; // From environment variable
+
+    if (!title || !description || !teamId) {
+      return res.status(400).json({
+        error: "Title, description, and teamId are required",
+      });
+    }
+
+    // Use the submitFeatureRequest function from linearService.js
+    const issue = await submitFeatureRequest({
+      title,
+      description,
+      priority,
+      apiKey,
+      teamId,
+    });
+
+    res.json({
+      success: true,
+      issue,
+    });
+  } catch (error) {
+    console.error("Failed to create feature request:", error);
+    res.status(500).json({ error: "Failed to create feature request" });
+  }
+});
+
+// Linear API configuration is now handled via environment variables
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

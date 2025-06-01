@@ -260,10 +260,10 @@ export function clearStorageItems(keys) {
 export const reviewCacheHelpers = {
   /**
    * Get the cache key for reviews of a specific company
-   * @param {string|number} glassdoorId - The Glassdoor ID of the company
+   * @param {string|number} id - The id of the company
    * @returns {string} The localStorage key for the reviews cache
    */
-  getKey: (glassdoorId) => `reviews_${glassdoorId}`,
+  getKey: (id) => `reviews_${id}`,
 
   /**
    * Find all review cache keys in localStorage
@@ -292,11 +292,11 @@ export const reviewCacheHelpers = {
 
   /**
    * Get reviews from cache for a specific company
-   * @param {string|number} glassdoorId - The Glassdoor ID of the company
+   * @param {string|number} id - The id of the company
    * @returns {Object|null} The cached reviews data or null if not found/valid
    */
-  getReviews: (glassdoorId) => {
-    const key = reviewCacheHelpers.getKey(glassdoorId);
+  getReviews: (id) => {
+    const key = reviewCacheHelpers.getKey(id);
     try {
       const data = localStorage.getItem(key);
       if (!data) return null;
@@ -304,7 +304,7 @@ export const reviewCacheHelpers = {
       const parsed = JSON.parse(data);
       return parsed;
     } catch (e) {
-      console.error(`Error accessing review cache for ${glassdoorId}:`, e);
+      console.error(`Error accessing review cache for ${id}:`, e);
       return null;
     }
   },

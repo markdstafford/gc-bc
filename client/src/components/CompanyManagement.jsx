@@ -1,8 +1,17 @@
 import React, { useState, useRef } from "react";
-import { Plus, Edit2, Trash2, X, Check, Search, Building2 } from "lucide-react";
+import {
+  Plus,
+  RefreshCw,
+  Trash2,
+  X,
+  Check,
+  Search,
+  Building2,
+} from "lucide-react";
 import { cn } from "../utils/cn";
 import { CompanyInfoRow } from "./CompanyInfoRow";
 import { CompanyLogo } from "./CompanyLogo";
+import { reviewApi } from "../utils/api";
 
 export function CompanyManagement({
   companies,
@@ -10,11 +19,12 @@ export function CompanyManagement({
   onUpdate,
   onDelete,
   onSearch,
+  onRefreshReviews,
 }) {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
-    glassdoorId: "",
     logoUrl: "",
     website: "",
     size: "",
@@ -32,14 +42,13 @@ export function CompanyManagement({
   const normalizedCompanies = companies
     .map((company) => ({
       id: company.id,
-      glassdoorId: company.glassdoorId,
-      name: company.name || company.displayName,
+      name: company.name || "",
       logoUrl: company.logoUrl,
       website: company.website,
-      size: company.size || company.size_category,
+      size: company.size,
       location: company.location || company.headquarters,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
   const handleSearch = async (queryOverride) => {
     const query = queryOverride !== undefined ? queryOverride : searchQuery;
@@ -50,12 +59,11 @@ export function CompanyManagement({
       // Normalize search results to match our new schema
       setSearchResults(
         results.map((result) => ({
-          id: result.id || result.glassdoorId,
-          glassdoorId: result.glassdoorId || result.id,
-          name: result.shortName || result.displayName || result.name,
+          id: result.id,
+          name: result.name || "",
           logoUrl: result.logoUrl,
           website: result.website,
-          size: result.size || result.size_category,
+          size: result.size,
           location: result.location || result.headquarters,
         }))
       );
@@ -68,10 +76,10 @@ export function CompanyManagement({
   };
 
   const handleSelectSearchResult = async (result) => {
-    setAddingId(result.glassdoorId);
+    setAddingId(result.id);
     try {
       await onAdd(
-        result.glassdoorId,
+        result.id,
         result.name,
         result.logoUrl,
         result.website,
@@ -90,7 +98,6 @@ export function CompanyManagement({
     if (editingId) {
       await onUpdate(
         editingId,
-        formData.glassdoorId,
         formData.name,
         formData.logoUrl,
         formData.website,
@@ -100,7 +107,7 @@ export function CompanyManagement({
       setEditingId(null);
     } else {
       await onAdd(
-        formData.glassdoorId,
+        formData.id,
         formData.name,
         formData.logoUrl,
         formData.website,
@@ -109,8 +116,8 @@ export function CompanyManagement({
       );
     }
     setFormData({
+      id: "",
       name: "",
-      glassdoorId: "",
       logoUrl: "",
       website: "",
       size: "",
@@ -121,8 +128,8 @@ export function CompanyManagement({
   const handleEdit = (company) => {
     setEditingId(company.id);
     setFormData({
+      id: company.id || "",
       name: company.name || "",
-      glassdoorId: company.glassdoorId || "",
       logoUrl: company.logoUrl || "",
       website: company.website || "",
       size: company.size || "",
@@ -133,8 +140,8 @@ export function CompanyManagement({
   const handleCancel = () => {
     setEditingId(null);
     setFormData({
+      id: "",
       name: "",
-      glassdoorId: "",
       logoUrl: "",
       website: "",
       size: "",
@@ -159,6 +166,18 @@ export function CompanyManagement({
       await onDelete(id);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  // Handler to refresh reviews for a company row
+  const handleRefreshReviews = async (company) => {
+    try {
+      // Optionally show a loading state here
+      await reviewApi.fetchAllReviews(company.id);
+      // Optionally show a success message or update UI
+    } catch (error) {
+      console.error("Failed to refresh reviews for company:", company, error);
+      // Optionally show an error message
     }
   };
 
@@ -204,16 +223,20 @@ export function CompanyManagement({
           {isSearching ? (
             // Show skeletons while searching
             <>
-              <SkeletonRow />
-              <SkeletonRow />
-              <SkeletonRow />
+              <SkeletonRow key="skeleton-1" />
+              <SkeletonRow key="skeleton-2" />
+              <SkeletonRow key="skeleton-3" />
             </>
-          ) : normalizedCompanies.filter((c) =>
-              c.name.toLowerCase().includes(searchQuery.toLowerCase())
+          ) : normalizedCompanies.filter(
+              (c) =>
+                c.name &&
+                c.name.toLowerCase().includes(searchQuery.toLowerCase())
             ).length > 0 ? (
             normalizedCompanies
-              .filter((c) =>
-                c.name.toLowerCase().includes(searchQuery.toLowerCase())
+              .filter(
+                (c) =>
+                  c.name &&
+                  c.name.toLowerCase().includes(searchQuery.toLowerCase())
               )
               .map((company) => (
                 <CompanyInfoRow
@@ -228,11 +251,11 @@ export function CompanyManagement({
               ))
           ) : (
             searchResults.map((result) =>
-              addingId === result.glassdoorId ? (
-                <SkeletonRow key={result.glassdoorId} />
+              addingId === result.id ? (
+                <SkeletonRow key={result.id} />
               ) : (
                 <CompanyInfoRow
-                  key={result.glassdoorId}
+                  key={result.id}
                   logoUrl={result.logoUrl}
                   name={result.name}
                   website={result.website}
@@ -268,11 +291,11 @@ export function CompanyManagement({
               rightContent={
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEdit(company)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                    title="Edit"
+                    onClick={() => handleRefreshReviews(company)}
+                    className="p-2 text-green-600 hover:bg-green-50 rounded-md transition-colors"
+                    title="Refresh Reviews"
                   >
-                    <Edit2 className="w-4 h-4" />
+                    <RefreshCw className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(company.id)}

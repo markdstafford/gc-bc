@@ -1,5 +1,5 @@
 /**
- * Version management utility for glass2door client application
+ * Version management utility for gc/bc client application
  * This module handles version tracking, comparison, and migration requirements
  */
 
@@ -11,7 +11,7 @@
  * - PATCH: Bug fixes, backward compatible
  * - LABEL: Optional label like 'alpha', 'beta', etc.
  */
-export const APP_VERSION = "1.0.0-alpha";
+export const APP_VERSION = "1.0.0-beta1";
 
 /**
  * History of versions with their migration requirements
@@ -24,6 +24,35 @@ export const APP_VERSION = "1.0.0-alpha";
  * - breaking: boolean indicating if this contains breaking changes
  */
 export const VERSION_HISTORY = [
+  {
+    version: "1.0.0-beta1",
+    requiresMigration: false, // First version doesn't migrate from anything
+    migrateFrom: [],
+    storageKeys: [
+      // Core data storage
+      "companies",
+      "app_version",
+      // UI Settings - ReviewsTable component
+      "reviewsTableColumnOrder",
+      "reviewsTableColumnVisibility",
+      "reviewsTableColumnOrderCompare",
+      "reviewsTableColumnVisibilityCompare",
+      // UI Settings - SentimentCharts component
+      "sentimentChartsOrder",
+      "sentimentChartsHidden",
+      "sentimentChartsOrderCompare",
+      "sentimentChartsHiddenCompare",
+    ],
+    // Any notes about this version
+    notes: "Polishes several aspects of the app, adds ability to create issues",
+    changes: [
+      "Added ability to report bugs and request features",
+      "Added manual refresh icon in company management modal",
+      "Added user guidance and ability to purge local storage",
+      "Completed rebranding",
+    ],
+    breaking: false,
+  },
   {
     version: "1.0.0-alpha",
     requiresMigration: false, // First version doesn't migrate from anything
